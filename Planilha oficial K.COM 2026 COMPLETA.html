@@ -1,0 +1,593 @@
+<meta name='viewport' content='width=device-width, initial-scale=1'/><meta name='viewport' content='width=device-width, initial-scale=1'/><!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CALCULADORA K.⚽️M</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.28/jspdf.plugin.autotable.min.js"></script>
+    
+    <style>
+        :root { --primary: #000; --accent: #3498db; --success: #27ae60; --bg: #000; --danger: #e74c3c; --dark-blue: #001f3f; --gold: #f1c40f; 
+                --bg-dark: #020617; --bg-card: #0f172a; --accent-blue: #3b82f6; --warning: #facc15; --text-gray: #cbd5e1; }
+        
+        body { font-family: 'Segoe UI', Arial, sans-serif; background-color: #000; margin: 0; padding: 10px; color: white; }
+        
+        .app-title {
+            background-color: var(--dark-blue); color: white; text-align: center; padding: 15px; font-size: 24px; font-weight: 900;
+            border-radius: 8px; margin-bottom: 20px; border: 2px solid #333;
+            text-shadow: -1px -1px 0 #fff, 1px -1px 0 #fff, -1px 1px 0 #fff, 1px 1px 0 #fff;
+            letter-spacing: 2px;
+        }
+
+        .tabs input[type="radio"] { display: none; }
+        .tab-content { width: 100%; padding: 15px; background: #000; border: 1px solid #333; display: none; border-radius: 8px; box-sizing: border-box; min-height: 80vh; margin: 0 auto; max-width: 1200px; position: relative; }
+        #tab1:checked ~ .content1, #tab2:checked ~ .content2, #tab4:checked ~ .content4, #tab5:checked ~ .content5, #tab6:checked ~ .content6, #tab7:checked ~ .content7 { display: block; }
+
+        .nav-container { display: flex; flex-wrap: wrap; gap: 8px; margin: 15px 0; }
+        .btn-nav { flex: 1; min-width: 100px; background: #111; color: white; border: 1px solid #333; padding: 12px; border-radius: 8px; font-weight: bold; text-transform: uppercase; cursor: pointer; font-size: 10px; display: flex; align-items: center; justify-content: center; gap: 5px; }
+        .btn-blue { background: #2980b9; border-color: #3498db; }
+        .btn-nav:hover { opacity: 0.8; }
+
+        .footer-credits { text-align: center; margin-top: 35px; padding-bottom: 20px; border-top: 1px solid #222; padding-top: 15px; }
+        .signature { color: #87CEEB; font-size: 14px; font-weight: bold; letter-spacing: 1px; margin-bottom: 4px; }
+        .faith-msg { color: var(--gold); font-size: 10px; font-weight: 800; text-transform: uppercase; }
+
+        .table-container { width: 100%; border-radius: 8px; overflow: hidden; border: 1px solid #333; background: #000; margin-top: 10px; }
+        .table-header { background: #1a1a1a; color: #fff; font-size: 10px; font-weight: bold; display: grid; grid-template-columns: 0.8fr 2fr 0.8fr 2fr 0.7fr; text-align: center; padding: 10px 0; }
+        .table-row { display: grid; grid-template-columns: 0.8fr 2fr 0.8fr 2fr 0.7fr; border-bottom: 1px solid #111; font-size: 11px; align-items: center; }
+        .cell { padding: 12px 3px; text-align: center; color: #eee; border-right: 1px solid #111; }
+        
+        .corner-card { background: #0a0a0a; border: 1px solid #333; padding: 15px; border-radius: 10px; margin-bottom: 15px; }
+        .corner-stat-grid { display: grid; grid-template-columns: 1fr 1fr 1.2fr; gap: 10px; margin-top: 10px; }
+        .stat-box { background: #000; padding: 10px; border-radius: 5px; border-left: 3px solid var(--accent); }
+        .stat-val-orig { font-size: 18px; font-weight: bold; color: var(--success); }
+        .stat-label-orig { font-size: 9px; color: #888; text-transform: uppercase; }
+        
+        .winner-box { background: #1a1a1a; border: 2px solid var(--gold); padding: 15px; border-radius: 10px; text-align: center; margin-bottom: 15px; }
+        .winner-title { font-size: 12px; color: var(--gold); font-weight: bold; margin-bottom: 5px; }
+        .winner-name { font-size: 20px; font-weight: 900; color: #fff; text-transform: uppercase; }
+        
+        .iframe-container { width: 100%; border: 1px solid #333; border-radius: 8px; overflow: hidden; margin-bottom: 10px; }
+        iframe { width: 100%; height: 450px; border: none; background: #fff; }
+        textarea { width: 100%; padding: 10px; border: 2px solid #333; border-radius: 8px; box-sizing: border-box; background: #111; color: #fff; resize: none; }
+        #rawInput { height: 70px; font-size: 18px; font-weight: bold; margin-top: 10px; width: 100%; }
+        .hidden { display: none !important; }
+        
+        .summary-card { background: #0a0a0a; border: 1px solid #333; border-radius: 15px; padding: 15px; text-align: center; max-width: 600px; margin: 0 auto; }
+        .alert-box { padding: 10px; border-radius: 10px; font-weight: 900; font-size: 1.2em; text-transform: uppercase; margin-bottom: 15px; border: 2px solid transparent; }
+        .total-box { display: flex; justify-content: center; align-items: center; gap: 15px; margin-bottom: 15px; }
+        .circle-stat { width: 85px; height: 85px; border-radius: 50%; border: 4px solid var(--success); display: flex; flex-direction: column; align-items: center; justify-content: center; background: #000; }
+        .big-num { font-size: 28px; font-weight: 900; color: #fff; line-height: 1; }
+        .circle-label { font-size: 10px; font-weight: bold; color: #aaa; text-transform: uppercase; margin-top: 2px; }
+        .perf-card { background: #0a0a0a; border: 1px solid #333; border-left: 5px solid var(--accent); padding: 10px; margin: 10px auto; border-radius: 4px; max-width: 600px; text-align: left; }
+        .prob-badge { background: var(--danger); color: white; padding: 15px; border-radius: 10px; font-weight: 900; font-size: 16px; width: 100%; max-width: 600px; margin: 10px auto; display: block; border: none; }
+
+        .titulo-premium { color: #ffffff; font-size: 20px; font-weight: 900; text-align: center; margin: 8px 0; text-transform: uppercase; }
+        .card-res { background: var(--bg-card); border-radius: 6px; padding: 8px; border: 1px solid #1e293b; text-align: center; margin-bottom: 8px; }
+        .grid-stats { display: grid; grid-template-columns: repeat(2, 1fr); gap: 4px; }
+        .stat-item { background: #1e293b; padding: 6px 2px; border-radius: 4px; font-size: 10px; font-weight: bold; color: var(--text-gray); }
+        .stat-val { display: block; font-size: 13px; color: #000; padding: 2px 4px; border-radius: 3px; margin-top: 2px; font-weight: 900; background: #000; color: #fff; }
+        .area-inputs { background: var(--bg-card); padding: 10px; border-radius: 8px; border: 1px solid var(--accent-blue); margin-bottom: 10px; }
+        .grid-inputs { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 8px; }
+        .area-inputs input[type="number"] { width: 100%; background: #020617; border: 1px solid #334155; color: white; padding: 6px 0; border-radius: 4px; text-align: center; font-size: 16px; font-weight: bold; margin-bottom: 4px; box-sizing: border-box;}
+        .area-inputs input[readonly] { background: #0f172a; border-color: #1e293b; color: #3498db; }
+        
+        .btn-main { width: 100%; border-radius: 6px; font-weight: bold; cursor: pointer; text-transform: uppercase; border: none; color: white; display: flex; align-items: center; justify-content: center; margin-bottom: 5px; height: 40px; }
+        .btn-save-hist { background: var(--warning); color: #000 !important; }
+        .btn-hist-main { background: #334155; }
+        
+        #modalHist { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: var(--bg-dark); z-index: 9999; padding: 10px; overflow-y: auto; box-sizing: border-box; }
+        .item-hist { background: var(--bg-card); border-left: 4px solid var(--warning); padding: 10px; margin-bottom: 12px; border-radius: 6px; }
+        .hist-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px; margin-top: 8px; font-size: 8px; background: rgba(0,0,0,0.4); padding: 8px; border-radius: 4px; }
+        .hist-label { color: var(--warning); font-weight: bold; display: block; font-size: 7px; text-transform: uppercase; margin-bottom: 2px; }
+        .hist-value { color: #fff; font-size: 11px; font-weight: 900; }
+
+        .abs-table { width: 100%; border-collapse: collapse; margin-top: 15px; background: #0a0a0a; border-radius: 8px; overflow: hidden; border: 1px solid #333; }
+        .abs-table th { background: #1e293b; color: var(--gold); padding: 12px; font-size: 11px; text-transform: uppercase; border: 1px solid #333; }
+        .abs-table td { padding: 15px; text-align: center; border: 1px solid #333; font-size: 14px; font-weight: bold; }
+        .abs-team-name { color: var(--accent-blue); font-size: 16px; margin-bottom: 10px; font-weight: 900; }
+    </style>
+</head>
+<body>
+
+<div class="app-title">CALCULADORA K.⚽️M</div>
+
+<div class="tabs">
+    <input type="radio" name="nav" id="tab1" checked>
+    <input type="radio" name="nav" id="tab2">
+    <input type="radio" name="nav" id="tab4">
+    <input type="radio" name="nav" id="tab5">
+    <input type="radio" name="nav" id="tab6">
+    <input type="radio" name="nav" id="tab7">
+
+    <div class="tab-content content1">
+        <div class="iframe-container"><iframe src="https://www.nowgoal.com"></iframe></div>
+        <div id="wrapperInput">
+            <textarea id="rawInput" oninput="checarInput()" placeholder="COLE OS DADOS AQUI..."></textarea>
+        </div>
+        <button id="btnReset" class="btn-nav hidden" style="width:100%; margin-top:10px;" onclick="limparDados()">NOVO JOGO</button>
+        <div class="nav-container" style="margin-top: 20px;">
+            <button class="btn-nav" onclick="document.getElementById('tab1').checked = true;">🏠 MENU PRINCIPAL</button>
+            <button class="btn-nav" onclick="document.getElementById('tab2').checked = true;">📋 LISTA JOGOS</button>
+            <button class="btn-nav btn-blue" onclick="document.getElementById('tab6').checked = true;">⏱️ ANALYSIS</button>
+            <button class="btn-nav" style="background: #6a1b9a;" onclick="document.getElementById('tab7').checked = true;">📊 ABS</button>
+        </div>
+        <div class="footer-credits">
+            <div class="signature">Aridelson B.</div>
+            <div class="faith-msg">Jesus te ama ❤️</div>
+        </div>
+    </div>
+
+    <div class="tab-content content2">
+        <div id="outJogos"></div>
+        <div class="nav-container">
+            <button class="btn-nav" onclick="document.getElementById('tab1').checked = true;">🏠 MENU PRINCIPAL</button>
+            <button class="btn-nav btn-blue" onclick="document.getElementById('tab4').checked = true;">⚽️ RESUMO DE GOLS</button>
+            <button class="btn-nav" onclick="document.getElementById('tab6').checked = true;">⏱️ ANALYSIS</button>
+            <button class="btn-nav" style="background: #6a1b9a;" onclick="document.getElementById('tab7').checked = true;">📊 ABS</button>
+        </div>
+        <div class="footer-credits">
+            <div class="signature">Aridelson B.</div>
+            <div class="faith-msg">Jesus te ama ❤️</div>
+        </div>
+    </div>
+
+    <div class="tab-content content4">
+        <div id="outFinal"></div>
+        <div class="nav-container">
+            <button class="btn-nav" onclick="document.getElementById('tab1').checked = true; limparDados();">🏠 MENU PRINCIPAL</button>
+            <button class="btn-nav btn-blue" onclick="document.getElementById('tab5').checked = true;">🚩 ESCANTEIOS</button>
+            <button class="btn-nav" onclick="document.getElementById('tab6').checked = true;">⏱️ ANALYSIS</button>
+            <button class="btn-nav" style="background: #6a1b9a;" onclick="document.getElementById('tab7').checked = true;">📊 ABS</button>
+        </div>
+        <div class="footer-credits">
+            <div class="signature">Aridelson B.</div>
+            <div class="faith-msg">Jesus te ama ❤️</div>
+        </div>
+    </div>
+
+    <div class="tab-content content5">
+        <div id="outCantos"></div>
+        <div class="nav-container">
+            <button class="btn-nav" onclick="document.getElementById('tab1').checked = true;">🏠 MENU PRINCIPAL</button>
+            <button class="btn-nav btn-blue" onclick="document.getElementById('tab4').checked = true;">⚽️ RESUMO DE GOLS</button>
+            <button class="btn-nav" onclick="document.getElementById('tab6').checked = true;">⏱️ ANALYSIS</button>
+            <button class="btn-nav" style="background: #6a1b9a;" onclick="document.getElementById('tab7').checked = true;">📊 ABS</button>
+        </div>
+        <div class="footer-credits">
+            <div class="signature">Aridelson B.</div>
+            <div class="faith-msg">Jesus te ama ❤️</div>
+        </div>
+    </div>
+
+    <div class="tab-content content6">
+        <div id="outHT">
+            <div class="titulo-premium">PRO ANALYZER K.C</div>
+            
+            <div id="cardResultados" style="display:none;">
+                <div id="tip" class="card-res" style="font-weight: bold; font-size: 16px;">AGUARDANDO...</div>
+                <div class="card-res">
+                    <div id="mTotal" style="color:var(--warning); font-weight:bold; font-size:15px; margin-bottom:5px;">MÉDIA: 0.00</div>
+                    <div class="grid-stats">
+                        <div class="stat-item">GOL HT (0.5O) <span class="stat-val" id="rHT">-</span></div>
+                        <div class="stat-item">AMBAS MARCAM <span class="stat-val" id="r7">-</span></div>
+                        <div class="stat-item">0.5 OVER <span class="stat-val" id="r1">-</span></div>
+                        <div class="stat-item">1.5 OVER <span class="stat-val" id="r2">-</span></div>
+                        <div class="stat-item">2.5 OVER <span class="stat-val" id="r3">-</span></div>
+                        <div class="stat-item">4.5 UNDER <span class="stat-val" id="r4b">-</span></div>
+                        <div class="stat-item">CASA (FT) <span class="stat-val" id="r5">-</span></div>
+                        <div class="stat-item">FORA (FT) <span class="stat-val" id="r6">-</span></div>
+                        <div class="stat-item">EMPATE (FT) <span class="stat-val" id="rEmp">-</span></div>
+                        <div class="stat-item">CASA MARCA 1º <span class="stat-val" id="rf1">-</span></div>
+                        <div class="stat-item">FORA MARCA 1º <span class="stat-val" id="rf2">-</span></div>
+                        <div class="stat-item">CASA OU EMP (1X) <span class="stat-val" id="r8">-</span></div>
+                        <div class="stat-item">CASA OU FORA (12) <span class="stat-val" id="r12">-</span></div>
+                        <div class="stat-item">FORA OU EMP (X2) <span class="stat-val" id="rX2">-</span></div>
+                    </div>
+                </div>
+                <button class="btn-main btn-save-hist" onclick="salvarNoHistórico()">💾 SALVAR NO HISTÓRICO</button>
+            </div>
+
+            <div class="area-inputs">
+                <div id="areaDadosTimes" style="display:none;">
+                    <div id="nomeTimes" style="text-align:center; font-size:13px; margin-bottom:8px; color:var(--accent-blue); font-weight:bold;">--- VS ---</div>
+                    <div class="grid-inputs">
+                        <div>
+                            <input type="number" id="hjg" placeholder="JG" readonly>
+                            <input type="number" id="hgp" placeholder="GP" readonly>
+                            <input type="number" id="hgc" placeholder="GC" readonly>
+                        </div>
+                        <div>
+                            <input type="number" id="ajg" placeholder="JG" readonly>
+                            <input type="number" id="agp" placeholder="GP" readonly>
+                            <input type="number" id="agc" placeholder="GC" readonly>
+                        </div>
+                    </div>
+                </div>
+                <button class="btn-main btn-hist-main" onclick="abrirHist()">VER HISTÓRICO</button>
+            </div>
+
+            <div id="emptyMsg" style="text-align:center; color:#888; padding: 20px;">
+                Coloque os dados na tela principal para ver a análise detalhada aqui.
+            </div>
+
+            <div id="modalHist">
+                <h2 style="color:var(--warning); text-align: center;">HISTÓRICO COMPLETO</h2>
+                <div id="listaHist"></div>
+                <button class="btn-main" style="background: var(--success); margin-top:15px;" onclick="gerarPDF()">📥 BAIXAR PDF COMPLETO</button>
+                <button class="btn-main" style="background: var(--danger);" onclick="excluirHistorico()">🗑️ LIMPAR TUDO</button>
+                <button class="btn-main" style="background: #334155;" onclick="document.getElementById('modalHist').style.display='none'">VOLTAR</button>
+            </div>
+        </div>
+
+        <div class="nav-container" style="margin-top: 20px;">
+            <button class="btn-nav" onclick="document.getElementById('tab1').checked = true;">🏠 MENU PRINCIPAL</button>
+            <button class="btn-nav" onclick="document.getElementById('tab2').checked = true;">📋 LISTA JOGOS</button>
+            <button class="btn-nav btn-blue" onclick="document.getElementById('tab4').checked = true;">⚽️ RESUMO DE GOLS</button>
+            <button class="btn-nav" onclick="document.getElementById('tab5').checked = true;">🚩 ESCANTEIOS</button>
+            <button class="btn-nav" style="background: #6a1b9a;" onclick="document.getElementById('tab7').checked = true;">📊 ABS</button>
+        </div>
+        <div class="footer-credits">
+            <div class="signature">Aridelson B.</div>
+            <div class="faith-msg">Jesus te ama ❤️</div>
+        </div>
+    </div>
+
+    <div class="tab-content content7">
+        <div class="titulo-premium">ESTATÍSTICAS ABS</div>
+        <div id="outABS">
+            <p style="text-align:center; color:#888;">Aguardando processamento de dados...</p>
+        </div>
+        <div class="nav-container" style="margin-top: 20px;">
+            <button class="btn-nav" onclick="document.getElementById('tab1').checked = true;">🏠 MENU PRINCIPAL</button>
+            <button class="btn-nav" onclick="document.getElementById('tab2').checked = true;">📋 LISTA JOGOS</button>
+            <button class="btn-nav btn-blue" onclick="document.getElementById('tab6').checked = true;">⏱️ ANALYSIS</button>
+        </div>
+        <div class="footer-credits">
+            <div class="signature">Aridelson B.</div>
+            <div class="faith-msg">Jesus te ama ❤️</div>
+        </div>
+    </div>
+</div>
+
+<script>
+    let dadosGlobal = [];
+    let memoriaHist = [];
+    
+    function checarInput() { 
+        if (document.getElementById('rawInput').value.length > 50) { 
+            document.getElementById('wrapperInput').classList.add('hidden'); 
+            document.getElementById('btnReset').classList.remove('hidden'); 
+            processar(); 
+            setTimeout(() => { document.getElementById('tab4').checked = true; }, 400); 
+        } 
+    }
+
+    function limparDados() { 
+        document.getElementById('rawInput').value = ''; 
+        document.getElementById('wrapperInput').classList.remove('hidden'); 
+        document.getElementById('btnReset').classList.add('hidden'); 
+        document.getElementById('outJogos').innerHTML = ''; 
+        document.getElementById('outFinal').innerHTML = ''; 
+        document.getElementById('outCantos').innerHTML = ''; 
+        document.getElementById('outABS').innerHTML = ''; 
+        document.getElementById('areaDadosTimes').style.display = 'none';
+        document.getElementById('cardResultados').style.display = 'none';
+        document.getElementById('emptyMsg').style.display = 'block';
+        document.getElementById('tab1').checked = true; 
+    }
+    
+    function processar() {
+        const raw = document.getElementById('rawInput').value;
+        const parts = raw.split("Previous Scores Statistics");
+        if (parts.length < 2) return;
+        const text = parts[1].split("FCSame Historical Odds")[0];
+        let lines = text.split('\n').filter(l => l.trim().length > 0);
+        dadosGlobal = [];
+        lines.forEach(line => {
+            if (line.includes('%') || line.includes('Bet365')) return;
+            let cols = line.split(/\t| {2,}/).filter(c => c.trim().length > 0);
+            let date = cols.find(c => /\d{2}-\d{2}/.test(c));
+            let scoreRaw = cols.find(c => /\d-\d\(/.test(c)) || cols.find(c => /\d-\d/.test(c) && c.length < 10);
+            let htRaw = "0-0";
+            if(scoreRaw && scoreRaw.includes('(')){
+                let match = scoreRaw.match(/\(([^)]+)\)/);
+                if(match) htRaw = match[1];
+            }
+            let corners = cols.find(c => /\d-\d/.test(c) && c !== scoreRaw) || "0-0";
+            if (date && scoreRaw) {
+                let scoreLimpo = scoreRaw.replace(/\(.*\)/, "").trim();
+                let s = scoreLimpo.split('-');
+                let h = htRaw.split('-');
+                let c = corners.split('-');
+                dadosGlobal.push({ 
+                    date, 
+                    home: cols.slice(cols.indexOf(date)+1, cols.indexOf(scoreRaw)).join(' '), 
+                    score: scoreLimpo, 
+                    gHome: parseInt(s[0]) || 0,
+                    gAway: parseInt(s[1]) || 0,
+                    ht: htRaw,
+                    htSoma: (parseInt(h[0]) || 0) + (parseInt(h[1]) || 0),
+                    away: cols[cols.indexOf(scoreRaw)+1] || "", 
+                    corners: corners, 
+                    cHome: parseInt(c[0]) || 0, 
+                    cAway: parseInt(c[1]) || 0, 
+                    soma: (parseInt(s[0]) || 0) + (parseInt(s[1]) || 0) 
+                });
+            }
+        });
+        renderJogos(); renderResumoFinal(); renderCantos(); renderABS(); preencherAnalysisAutomatico();
+    }
+
+    function identificarTime(jogos) { 
+        if (!jogos.length) return "---"; 
+        let h = {}, a = {}; 
+        jogos.forEach(j => { h[j.home] = (h[j.home] || 0) + 1; a[j.away] = (a[j.away] || 0) + 1; }); 
+        return (h[jogos[0].home] || 0) >= (a[jogos[0].away] || 0) ? jogos[0].home : jogos[0].away; 
+    }
+
+    function preencherAnalysisAutomatico() {
+        if(dadosGlobal.length < 20) return;
+        let b1 = dadosGlobal.slice(0, 10); let timeM = identificarTime(b1);
+        let b2 = dadosGlobal.slice(10, 20); let timeV = identificarTime(b2);
+        let alvoM = b1.filter(j => j.home === timeM);
+        let gpM = 0, gcM = 0; alvoM.forEach(j => { gpM += j.gHome; gcM += j.gAway; });
+        let alvoV = b2.filter(j => j.away === timeV);
+        let gpV = 0, gcV = 0; alvoV.forEach(j => { gpV += j.gAway; gcV += j.gHome; });
+        
+        document.getElementById('nomeTimes').innerText = `${timeM} VS ${timeV}`;
+        document.getElementById('hjg').value = alvoM.length;
+        document.getElementById('hgp').value = gpM;
+        document.getElementById('hgc').value = gcM;
+        document.getElementById('ajg').value = alvoV.length;
+        document.getElementById('agp').value = gpV;
+        document.getElementById('agc').value = gcV;
+        
+        document.getElementById('areaDadosTimes').style.display = 'block';
+        document.getElementById('cardResultados').style.display = 'block';
+        document.getElementById('emptyMsg').style.display = 'none';
+        calcular(); 
+    }
+
+    function renderABS() {
+        if(dadosGlobal.length < 20) return;
+        let b1 = dadosGlobal.slice(0, 10); let timeM = identificarTime(b1);
+        let b2 = dadosGlobal.slice(10, 20); let timeV = identificarTime(b2);
+        let alvoM = b1.filter(j => j.home === timeM);
+        let gpM = 0, gcM = 0; alvoM.forEach(j => { gpM += j.gHome; gcM += j.gAway; });
+        let alvoV = b2.filter(j => j.away === timeV);
+        let gpV = 0, gcV = 0; alvoV.forEach(j => { gpV += j.gAway; gcV += j.gHome; });
+        document.getElementById('outABS').innerHTML = `
+            <div class="corner-card">
+                <div class="abs-team-name">🏠 MANDANTE: ${timeM}</div>
+                <table class="abs-table">
+                    <tr><th>Jogos (Casa)</th><th>Gols Feitos</th><th>Gols Sofridos</th></tr>
+                    <tr><td>${alvoM.length}</td><td style="color:var(--success)">${gpM}</td><td style="color:var(--danger)">${gcM}</td></tr>
+                </table>
+            </div>
+            <div class="corner-card">
+                <div class="abs-team-name">✈️ VISITANTE: ${timeV}</div>
+                <table class="abs-table">
+                    <tr><th>Jogos (Fora)</th><th>Gols Feitos</th><th>Gols Sofridos</th></tr>
+                    <tr><td>${alvoV.length}</td><td style="color:var(--success)">${gpV}</td><td style="color:var(--danger)">${gcV}</td></tr>
+                </table>
+            </div>
+        `;
+    }
+
+    function renderCantos() {
+        if(dadosGlobal.length < 20) return;
+        let b1 = dadosGlobal.slice(0, 10); let timeM = identificarTime(b1);
+        let b2 = dadosGlobal.slice(10, 20); let timeV = identificarTime(b2);
+        let alvoM = b1.filter(j => j.home === timeM); let fezM = 0; alvoM.forEach(j => fezM += j.cHome);
+        let mFM = ((fezM / (alvoM.length || 1)) / 2).toFixed(2);
+        let segM = (mFM * 0.6).toFixed(2);
+        let alvoV = b2.filter(j => j.away === timeV); let fezV = 0; alvoV.forEach(j => fezV += j.cAway);
+        let mFV = ((fezV / (alvoV.length || 1)) / 2).toFixed(2);
+        let segV = (mFV * 0.6).toFixed(2);
+        let projecaoTotal = (parseFloat(mFM) + parseFloat(mFV)).toFixed(2);
+        let projecaoSeguranca = (parseFloat(segM) + parseFloat(segV)).toFixed(2);
+        let vencedor = parseFloat(mFM) > parseFloat(mFV) + 0.5 ? timeM : (parseFloat(mFV) > parseFloat(mFM) + 0.5 ? timeV : "EMPATE TÉCNICO");
+        document.getElementById('outCantos').innerHTML = `
+            <div class="winner-box"><div class="winner-title">🏆 TENDÊNCIA VENCEDOR</div><div class="winner-name">${vencedor}</div></div>
+            <div class="corner-card"><div style="font-weight:bold; color:var(--accent)">🏠 CASA: ${timeM}</div>
+                <div class="corner-stat-grid">
+                    <div class="stat-box"><div class="stat-label-orig">Total</div><div class="stat-val-orig">${fezM}</div></div>
+                    <div class="stat-box"><div class="stat-label-orig">Média</div><div class="stat-val-orig">${mFM}</div></div>
+                    <div class="stat-box" style="border-left-color: var(--gold);"><div class="stat-label-orig">Segurança</div><div class="stat-val-orig">${segM}</div></div>
+                </div>
+            </div>
+            <div class="corner-card"><div style="font-weight:bold; color:var(--danger)">✈️ FORA: ${timeV}</div>
+                <div class="corner-stat-grid">
+                    <div class="stat-box"><div class="stat-label-orig">Total</div><div class="stat-val-orig">${fezV}</div></div>
+                    <div class="stat-box"><div class="stat-label-orig">Média</div><div class="stat-val-orig">${mFV}</div></div>
+                    <div class="stat-box" style="border-left-color: var(--gold);"><div class="stat-label-orig">Segurança</div><div class="stat-val-orig">${segV}</div></div>
+                </div>
+            </div>
+            <div style="background:var(--dark-blue); padding:10px; border-radius:10px 10px 0 0; text-align:center; border:1px solid #fff; border-bottom:none; font-size: 14px;">🚩 ${projecaoTotal} ESCANTEIOS (PROJEÇÃO)</div>
+            <div style="background:#1a1a1a; padding:10px; border-radius:0 0 10px 10px; text-align:center; border:1px solid #fff; color: var(--gold); font-weight: bold; font-size: 14px;">🛡️ ${projecaoSeguranca} PROJEÇÃO DE SEGURANÇA</div>`;
+    }
+
+    function renderResumoFinal() {
+        if(dadosGlobal.length < 20) return;
+        let b1 = dadosGlobal.slice(0, 10); let timeM = identificarTime(b1);
+        let b2 = dadosGlobal.slice(10, 20); let timeV = identificarTime(b2);
+        let alvoM = b1.filter(j => j.home === timeM); let overM = alvoM.filter(j => j.soma >= 3).length;
+        let alvoV = b2.filter(j => j.away === timeV); let overV = alvoV.filter(j => j.soma >= 3).length;
+        let somaOver = overM + overV;
+        let msg = somaOver >= 8 ? "2.5 OVER GOL" : (somaOver >= 6 ? "1.5 OVER GOL" : (somaOver >= 4 ? "0.5 OVER GOL" : "4.5 UNDER GOL"));
+        let prob = (somaOver/20)*100;
+        let html = `<div class="summary-card"><div class="alert-box" style="background:#27ae60; color:white;">${msg}</div><div class="total-box"><div class="circle-stat"><span class="big-num">${overM}</span><span class="circle-label">CASA</span></div><div class="circle-stat"><span class="big-num">${overV}</span><span class="circle-label">FORA</span></div></div></div>
+            <div class="perf-card"><b>🏠 MANDANTE:</b> ${timeM}</div><div class="perf-card" style="border-left-color: var(--danger);"><b>✈️ VISITANTE:</b> ${timeV}</div>
+            <div class="table-container"><div class="table-header" style="grid-template-columns: 1fr 1fr 1fr 1fr; background:#3498db"><div>DATA</div><div>PLACAR</div><div>DATA</div><div>PLACAR</div></div>`;
+        for(let i=0; i<10; i++){ let jM = alvoM[i] || {score:'-', soma:0, date:''}; let jV = alvoV[i] || {score:'-', soma:0, date:''}; html += `<div class="table-row" style="grid-template-columns: 1fr 1fr 1fr 1fr;"><div class="cell">${jM.date}</div><div class="cell"><b>${jM.score}</b></div><div class="cell">${jV.date}</div><div class="cell"><b>${jV.score}</b></div></div>`; }
+        html += `</div><button class="prob-badge">PROBABILIDADE ${prob}%</button>`;
+        document.getElementById('outFinal').innerHTML = html;
+    }
+
+    function renderJogos() {
+        let html = `<div class="table-container"><div class="table-header"><div>DATA</div><div>CASA</div><div>SCORE</div><div>FORA</div><div>CNR</div></div>`;
+        dadosGlobal.forEach(j => { html += `<div class="table-row"><div class="cell">${j.date}</div><div class="cell">${j.home}</div><div class="cell"><b>${j.score}</b></div><div class="cell">${j.away}</div><div class="cell"><b>${j.corners}</b></div></div>`; });
+        document.getElementById('outJogos').innerHTML = html + `</div>`;
+    }
+
+    function calcular() {
+        const hj = parseFloat(document.getElementById('hjg').value) || 1;
+        const aj = parseFloat(document.getElementById('ajg').value) || 1;
+        const hgp = parseFloat(document.getElementById('hgp').value) || 0;
+        const agp = parseFloat(document.getElementById('agp').value) || 0;
+        const hgc = parseFloat(document.getElementById('hgc').value) || 0;
+        const agc = parseFloat(document.getElementById('agc').value) || 0;
+        const mediaNum = (( (hgp+hgc)/hj + (agp+agc)/aj ) / 2);
+        document.getElementById('mTotal').innerText = "MÉDIA: " + mediaNum.toFixed(2);
+        const tipEl = document.getElementById('tip');
+        if (mediaNum < 2.00) tipEl.innerText = "TIP: 4.5 UNDER GOL"; else if (mediaNum <= 2.89) tipEl.innerText = "TIP: 0.5 OVER GOL"; else if (mediaNum <= 3.29) tipEl.innerText = "TIP: 1.5 OVER GOL"; else tipEl.innerText = "TIP: 2.5 OVER GOL";
+        
+        const mH = hgp / hj; const mA = agp / aj;
+        const pC = (mH / (mH + mA)) * 80 || 33.3; 
+        const pF = (mA / (mH + mA)) * 80 || 33.3; 
+        const pE = 20;
+        const baseCalc = mediaNum * 2;
+
+        const valHT = limitar(baseCalc * 19.5);
+        const valAmbas = limitar(baseCalc * 16);
+        const valO05 = "98.8";
+        const valO15 = limitar(baseCalc * 22);
+        const valO25 = limitar(baseCalc * 14);
+        const valU45 = limitar(100 - (baseCalc * 5));
+        const valCasa = limitar(pC);
+        const valFora = limitar(pF);
+        const valEmp = limitar(pE);
+        const valCM1 = limitar(pC + 5);
+        const valFM1 = limitar(pF + 5);
+        const val1X = limitar(pC + pE);
+        const val12 = limitar(pC + pF);
+        const valX2 = limitar(pF + pE);
+
+        aplicarCorPorRegra('rHT', valHT, 'padrão');
+        aplicarCorPorRegra('r7', valAmbas, 'padrão');
+        aplicarCorPorRegra('r1', valO05, 'over');
+        aplicarCorPorRegra('r2', valO15, 'over');
+        aplicarCorPorRegra('r3', valO25, 'over25');
+        aplicarCorPorRegra('r4b', valU45, 'under45');
+        aplicarCorPorRegra('r5', valCasa, 'padrão');
+        aplicarCorPorRegra('r6', valFora, 'padrão');
+        aplicarCorPorRegra('rEmp', valEmp, 'padrão');
+
+        // Lógica Marca 1º (Maior Verde, Menor Vermelho)
+        const fCM1 = parseFloat(valCM1); const fFM1 = parseFloat(valFM1);
+        document.getElementById('rf1').innerText = valCM1 + "%";
+        document.getElementById('rf2').innerText = valFM1 + "%";
+        if(fCM1 > fFM1) { pintar('rf1','verde'); pintar('rf2','vermelho'); }
+        else { pintar('rf2','verde'); pintar('rf1','vermelho'); }
+
+        // Lógica Dupla Chance (Maior Verde, Médio Amarelo, Menor Vermelho)
+        const dc = [
+            {id: 'r8', val: parseFloat(val1X), txt: val1X},
+            {id: 'r12', val: parseFloat(val12), txt: val12},
+            {id: 'rX2', val: parseFloat(valX2), txt: valX2}
+        ];
+        dc.sort((a,b) => b.val - a.val);
+        dc.forEach((item, idx) => {
+            document.getElementById(item.id).innerText = item.txt + "%";
+            if(idx === 0) pintar(item.id, 'verde');
+            else if(idx === 1) pintar(item.id, 'amarelo');
+            else pintar(item.id, 'vermelho');
+        });
+    }
+    
+    function limitar(v) { return Math.min(Math.max(v, 0), 99.9).toFixed(1); }
+
+    function pintar(id, cor) {
+        const el = document.getElementById(id);
+        if(!el) return;
+        if(cor === 'verde') { el.style.backgroundColor = "#27ae60"; el.style.color = "#000"; }
+        else if(cor === 'amarelo') { el.style.backgroundColor = "#facc15"; el.style.color = "#000"; }
+        else if(cor === 'vermelho') { el.style.backgroundColor = "#e74c3c"; el.style.color = "#fff"; }
+    }
+
+    function aplicarCorPorRegra(id, valor, tipo) {
+        const el = document.getElementById(id);
+        if(!el) return;
+        el.innerText = valor + "%";
+        const v = parseFloat(valor);
+
+        if(tipo === 'padrão') { // AMBAS, HT, CASA, EMPATE, FORA
+            if(v >= 70) pintar(id, 'verde');
+            else if(v >= 50) pintar(id, 'amarelo');
+            else pintar(id, 'vermelho');
+        } 
+        else if(tipo === 'over') { // 0.5 e 1.5 Over
+            if(v >= 79) pintar(id, 'verde');
+            else if(v >= 74) pintar(id, 'amarelo');
+            else pintar(id, 'vermelho');
+        }
+        else if(tipo === 'over25') { // 2.5 Over
+            if(v >= 60) pintar(id, 'verde');
+            else if(v >= 56) pintar(id, 'amarelo');
+            else pintar(id, 'vermelho');
+        }
+        else if(tipo === 'under45') { // 4.5 Under
+            if(v <= 74) pintar(id, 'verde');
+            else pintar(id, 'vermelho');
+        }
+    }
+
+    function salvarNoHistórico() {
+        const s = {};
+        document.querySelectorAll('.stat-val').forEach(el => s[el.id] = el.innerText);
+        memoriaHist.unshift({ 
+            confronto: document.getElementById('nomeTimes').innerText,
+            media: document.getElementById('mTotal').innerText,
+            tip: document.getElementById('tip').innerText, 
+            stats: s, 
+            data: new Date().toLocaleString() 
+        });
+        alert("Análise completa salva no histórico!");
+    }
+
+    function abrirHist() {
+        const lista = document.getElementById('listaHist');
+        lista.innerHTML = memoriaHist.map(i => `
+            <div class="item-hist">
+                <div style="font-size:10px; color:#888">${i.data} | ${i.media}</div>
+                <div style="font-weight:bold; color:var(--accent-blue); font-size:14px; margin: 5px 0;">${i.confronto}</div>
+                <div style="color:var(--warning); font-size:12px; font-weight:900; margin-bottom:8px; border-bottom: 1px solid #333; padding-bottom: 3px;">${i.tip}</div>
+                <div class="hist-grid">
+                    <div><span class="hist-label">CASA</span><span class="hist-value">${i.stats.r5}</span></div>
+                    <div><span class="hist-label">FORA</span><span class="hist-value">${i.stats.r6}</span></div>
+                    <div><span class="hist-label">EMPATE</span><span class="hist-value">${i.stats.rEmp}</span></div>
+                    <div><span class="hist-label">0.5O</span><span class="hist-value">${i.stats.r1}</span></div>
+                    <div><span class="hist-label">1.5O</span><span class="hist-value">${i.stats.r2}</span></div>
+                    <div><span class="hist-label">2.5O</span><span class="hist-value">${i.stats.r3}</span></div>
+                    <div><span class="hist-label">AMBAS</span><span class="hist-value">${i.stats.r7}</span></div>
+                    <div><span class="hist-label">GOL HT</span><span class="hist-value">${i.stats.rHT}</span></div>
+                    <div><span class="hist-label">4.5U</span><span class="hist-value">${i.stats.r4b}</span></div>
+                    <div><span class="hist-label">CASA M1º</span><span class="hist-value">${i.stats.rf1}</span></div>
+                    <div><span class="hist-label">FORA M1º</span><span class="hist-value">${i.stats.rf2}</span></div>
+                    <div><span class="hist-label">1X (CD)</span><span class="hist-value">${i.stats.r8}</span></div>
+                    <div><span class="hist-label">12 (CD)</span><span class="hist-value">${i.stats.r12}</span></div>
+                    <div><span class="hist-label">X2 (CD)</span><span class="hist-value">${i.stats.rX2}</span></div>
+                </div>
+            </div>
+        `).join('') || "<p style='text-align:center; color: #666;'>O histórico está vazio.</p>";
+        document.getElementById('modalHist').style.display = 'block';
+    }
+
+    function gerarPDF() {
+        const { jsPDF } = window.jspdf;
+        const doc = new jsPDF('l', 'mm', 'a4'); 
+        doc.setFontSize(16); 
+        doc.setTextColor(41, 128, 185);
+        doc.text("RELATÓRIO COMPLETO - PRO ANALYZER K.C", 14, 15);
+        const headers = [['DATA', 'CONFRONTO', 'TIP', 'CASA', 'FORA', 'EMPATE', '0.5O', '1.5O', '2.5O', 'AMBAS', 'HT', '1X', '12', 'X2', 'C.M1º', 'F.M1º']];
+        const rows = memoriaHist.map(i => [i.data, i.confronto, i.tip, i.stats.r5, i.stats.r6, i.stats.rEmp, i.stats.r1, i.stats.r2, i.stats.r3, i.stats.r7, i.stats.rHT, i.stats.r8, i.stats.r12, i.stats.rX2, i.stats.rf1, i.stats.rf2]);
+        doc.autoTable({ head: headers, body: rows, startY: 22, styles: { fontSize: 6, cellPadding: 1.5, halign: 'center' }, headStyles: { fillColor: [0, 31, 63] }, theme: 'grid' });
+        doc.save("Historico_KCM_Completo.pdf");
+    }
+
+    function excluirHistorico() { if(confirm("Deseja apagar permanentemente todo o histórico?")) { memoriaHist = []; abrirHist(); } }
+</script>
+</body>
+</html>
