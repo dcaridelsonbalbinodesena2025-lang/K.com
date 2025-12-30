@@ -1,0 +1,296 @@
+<meta name='viewport' content='width=device-width, initial-scale=1'/><!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Analisador Aridelson Pro - Neon Edition</title>
+    <style>
+        :root { --blue: #007aff; --red: #ff3b30; --green: #4cd964; --dark-blue: #004080; }
+        body { 
+            display: flex; flex-direction: column; align-items: center; 
+            min-height: 100vh; margin: 0; background-color: #b0b0b0; 
+            font-family: 'Segoe UI', sans-serif; padding: 10px;
+        }
+
+        .smartphone { 
+            width: 330px; height: 720px; background: #1a1a1a; 
+            border-radius: 50px; border: 10px solid #333; 
+            box-shadow: 0 40px 80px rgba(0,0,0,0.6); 
+            position: relative; padding: 12px; box-sizing: border-box; 
+        }
+        .screen { width: 100%; height: 100%; background: #000; border-radius: 38px; overflow: hidden; display: flex; flex-direction: column; }
+
+        /* VISOR COM EFEITO NEON */
+        .display { height: 42%; background: #000; position: relative; overflow: hidden; display: flex; flex-direction: column; }
+        #standby-screen { position: absolute; width: 100%; height: 100%; display: flex; flex-direction: column; justify-content: center; align-items: center; background: #000; z-index: 20; }
+        
+        .visor-half { height: 50%; width: 100%; display: none; flex-direction: column; justify-content: center; align-items: center; }
+        .top-half { border-bottom: 1px solid rgba(255,255,255,0.1); }
+        
+        .res-balloon { 
+            width: 92%; height: 95%; border-radius: 15px; 
+            display: flex; flex-direction: column; justify-content: center; align-items: center; 
+            border: 2px solid rgba(255,255,255,0.3);
+            box-shadow: inset 0 0 15px rgba(0,0,0,0.4);
+        }
+        
+        /* BRILHO NEON NOS TÍTULOS */
+        .neon-text { 
+            font-weight: 900; font-size: 1.8rem; 
+            animation: neon-pulse 1.5s ease-in-out infinite alternate;
+        }
+        @keyframes neon-pulse {
+            from { text-shadow: 0 0 5px #fff, 0 0 10px #fff, 0 0 15px var(--blue); }
+            to { text-shadow: 0 0 10px #fff, 0 0 20px var(--blue), 0 0 30px var(--blue); }
+        }
+
+        .result-inside { font-weight: 900; font-size: 0.95rem; text-transform: uppercase; margin-top: 2px; }
+        .mini-data { font-size: 0.6rem; font-weight: bold; opacity: 0.8; margin-bottom: 2px; }
+
+        /* VERSÍCULOS */
+        .bible-bar { height: 22px; background: #111; color: #ffd700; font-size: 0.7rem; display: flex; align-items: center; overflow: hidden; white-space: nowrap; border-bottom: 1px solid #333; }
+        .marquee { display: inline-block; padding-left: 100%; animation: scroll 30s linear infinite; }
+        @keyframes scroll { 0% { transform: translateX(0); } 100% { transform: translateX(-100%); } }
+
+        /* DADOS E TECLADO */
+        .data-area { height: 12%; display: flex; justify-content: space-between; align-items: center; padding: 0 12px; background: #0a0a0a; border-bottom: 1px solid #222; }
+        .team-column { width: 45%; display: flex; flex-direction: column; }
+        .value-box { background: #151515; border-radius: 4px; width: 30%; height: 24px; display: flex; justify-content: center; align-items: center; font-size: 0.85rem; border-bottom: 2px solid #444; color: #fff; }
+        .value-box.active { border-bottom-color: var(--blue); }
+        .input-team-cell { width: 50%; height: 30px; background: #222; border: 1px solid #444; border-radius: 8px; color: #fff; text-align: center; font-size: 0.75rem; outline: none; }
+
+        .keypad-area { height: 38%; display: grid; grid-template-columns: repeat(4, 1fr); gap: 4px; padding: 6px 12px; background: #000; }
+        button { border: none; border-radius: 8px; font-weight: bold; cursor: pointer; display: flex; justify-content: center; align-items: center; color: white; }
+        .btn-num { background: #222; font-size: 1.1rem; height: 38px; }
+        .btn-compact { height: 34px !important; font-size: 0.65rem; text-transform: uppercase; }
+
+        /* HISTÓRICO */
+        #history-screen { display: none; position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: #000; z-index: 100; overflow-y: auto; padding: 15px; box-sizing: border-box; color: #fff; }
+        .history-card { background: #111; padding: 12px; border-radius: 15px; margin-bottom: 15px; border: 1px solid #333; position: relative; }
+        .btn-del-ticket { position: absolute; top: 10px; right: 10px; background: var(--red); color: white; border: none; border-radius: 5px; font-size: 0.6rem; padding: 4px 8px; cursor: pointer; }
+    </style>
+</head>
+<body>
+
+    <div class="smartphone">
+        <div class="screen">
+            <div class="display">
+                <div id="standby-screen">
+                    <div class="neon-text" style="color:var(--blue); font-size: 2.5rem;">K.C⚽️M</div>
+                    <div style="color:#fff; font-size:0.7rem; font-weight:bold;">ARIDELSON B.</div>
+                </div>
+                
+                <div class="visor-half top-half" id="box-top">
+                    <div class="res-balloon" id="bal-top">
+                        <span class="mini-data" id="miniA">JG:0 GP:0 GC:0</span>
+                        <span class="neon-text" id="title-top">K.C⚽️M</span>
+                        <span class="result-inside" id="res-top"></span>
+                    </div>
+                </div>
+
+                <div class="visor-half" id="box-btm">
+                    <div class="res-balloon" id="bal-btm">
+                        <span class="mini-data" id="miniB">JG:0 GP:0 GC:0</span>
+                        <span class="neon-text" id="title-btm" style="animation-delay: 0.5s;">R⚽️3</span>
+                        <span class="result-inside" id="res-btm"></span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="bible-bar">
+                <div class="marquee">"Tudo posso naquele que me fortalece" • "O Senhor é o meu pastor" • "Alegrai-vos na esperança"</div>
+            </div>
+
+            <div class="data-area">
+                <div class="team-column">
+                    <div style="display:flex; justify-content:space-between;">
+                        <div class="value-box" id="c1">--</div><div class="value-box" id="c2">--</div><div class="value-box" id="c3">--</div>
+                    </div>
+                </div>
+                <div style="color:#444">/</div>
+                <div class="team-column">
+                    <div style="display:flex; justify-content:space-between;">
+                        <div class="value-box" id="c4">--</div><div class="value-box" id="c5">--</div><div class="value-box" id="c6">--</div>
+                    </div>
+                </div>
+            </div>
+
+            <div style="height:8%; background:#111; display:flex; gap:8px; padding:0 12px; align-items:center;">
+                <input type="text" id="tA" class="input-team-cell" placeholder="TIME CASA">
+                <input type="text" id="tB" class="input-team-cell" placeholder="TIME FORA">
+            </div>
+
+            <div class="keypad-area">
+                <button class="btn-num" onclick="typeNum('1')">1</button>
+                <button class="btn-num" onclick="typeNum('2')">2</button>
+                <button class="btn-num" onclick="typeNum('3')">3</button>
+                <button class="btn-num" onclick="typeNum('4')">4</button>
+                <button class="btn-num" onclick="typeNum('5')">5</button>
+                <button class="btn-num" onclick="typeNum('6')">6</button>
+                <button class="btn-num" onclick="typeNum('7')">7</button>
+                <button class="btn-num" onclick="typeNum('8')">8</button>
+                <button class="btn-num" onclick="typeNum('9')">9</button>
+                <button class="btn-num" onclick="typeNum('0')">0</button>
+                <button style="background:var(--red)" onclick="nav(-1)">&lt;</button>
+                <button style="background:var(--green); color:black" onclick="nav(1)">&gt;</button>
+                
+                <button class="btn-compact" style="grid-column: span 2; background:var(--red)" onclick="cleanAllFields()">Limpar Tudo</button>
+                <button class="btn-compact" style="grid-column: span 2; background:white; color:black" onclick="cleanCalculatorOnly()">Limpar Dados</button>
+                
+                <button class="btn-compact" style="grid-column: span 2; background:var(--blue)" onclick="addGame()">Adicionar Jogo</button>
+                <button class="btn-compact" style="grid-column: span 2; background:var(--green); color:black" onclick="finishTicket()">Finalizar Bilhete</button>
+                
+                <button class="btn-compact" style="grid-column: span 4; background:#333" onclick="toggleHistory(true)">📜 Ver Histórico de Bilhetes</button>
+            </div>
+
+            <div id="history-screen">
+                <h3 style="text-align:center; color:var(--blue); margin-top:0">HISTÓRICO</h3>
+                <div id="history-list"></div>
+                <button style="width:100%; padding:12px; background:var(--red); border-radius:8px; border:none; color:white; font-weight:bold" onclick="toggleHistory(false)">VOLTAR</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let index = 1;
+        let currentTicket = [];
+        let allTickets = JSON.parse(localStorage.getItem('tickets_ari_v16')) || [];
+
+        function typeNum(n) {
+            let cell = document.getElementById('c' + index);
+            cell.innerText = (cell.innerText === '--') ? n : cell.innerText + n;
+        }
+        function nav(dir) {
+            if (dir === 1 && index === 6) calculate();
+            else { index = Math.max(1, Math.min(6, index + dir)); updateUI(); }
+        }
+        function updateUI() {
+            document.querySelectorAll('.value-box').forEach(el => el.classList.remove('active'));
+            document.getElementById('c' + index).classList.add('active');
+        }
+        function cleanAllFields() {
+            document.getElementById('tA').value = ""; document.getElementById('tB').value = "";
+            cleanCalculatorOnly();
+        }
+        function cleanCalculatorOnly() {
+            for (let i = 1; i <= 6; i++) document.getElementById('c' + i).innerText = '--';
+            document.getElementById('standby-screen').style.display = 'flex';
+            document.getElementById('box-top').style.display = 'none';
+            document.getElementById('box-btm').style.display = 'none';
+            index = 1; updateUI();
+        }
+
+        function calculate() {
+            const getV = (id) => parseFloat(document.getElementById('c' + id).innerText) || 0;
+            const jgA = getV(1), gpA = getV(2), gcA = getV(3), jgB = getV(4), gpB = getV(5), gcB = getV(6);
+            if (jgA > 0 && jgB > 0) {
+                document.getElementById('standby-screen').style.display = 'none';
+                document.getElementById('box-top').style.display = 'flex';
+                document.getElementById('box-btm').style.display = 'flex';
+                document.getElementById('miniA').innerText = `JG:${jgA} GP:${gpA} GC:${gcA}`;
+                document.getElementById('miniB').innerText = `JG:${jgB} GP:${gpB} GC:${gcB}`;
+                const media = (gpA + gpB) / (jgA + jgB);
+                const r3 = ((gpA/jgA)+(gcA/jgA)) + ((gpB/jgB)+(gcB/jgB));
+                setRes('bal-top', 'res-top', 'title-top', getLabel(media, 'k'), getCol(media, 'k'));
+                setRes('bal-btm', 'res-btm', 'title-btm', getLabel(r3, 'r'), getCol(r3, 'r'));
+            }
+        }
+
+        function getLabel(v, type) {
+            if(type === 'k') {
+                if (v < 2) return "4.5 UNDER GOL";
+                if (v <= 2.29) return "0.5 OVER (POSSÍVEL)";
+                if (v <= 3.29) return "1.5 OVER GOL";
+                return "2.5 OVER GOL";
+            } else {
+                if (v < 4) return "4.5 UNDER GOL";
+                if (v <= 5.99) return "0.5 OVER GOL";
+                if (v <= 7.99) return "1.5 OVER GOL";
+                return "2.5 OVER GOL";
+            }
+        }
+        function getCol(v, type) { return (v < 2 || (type === 'r' && v < 4)) ? "#ff3b30" : "#4cd964"; }
+
+        function setRes(balId, txtId, titleId, t, c) {
+            const bal = document.getElementById(balId);
+            const txt = document.getElementById(txtId);
+            const title = document.getElementById(titleId);
+            bal.style.background = c;
+            txt.innerText = t;
+            const color = (c === "#4cd964") ? "black" : "white";
+            txt.style.color = color; title.style.color = color;
+            title.style.animation = "none"; // Reset neon se for preto
+            if(color === "white") title.style.animation = "neon-pulse 1.5s ease-in-out infinite alternate";
+        }
+
+        function addGame() {
+            const resK = document.getElementById('res-top').innerText;
+            if(!resK) return alert("Calcule antes!");
+            currentTicket.push({
+                times: (document.getElementById('tA').value || "S/N") + " x " + (document.getElementById('tB').value || "S/N"),
+                k: resK, status: 'pending'
+            });
+            alert("Jogo Adicionado!");
+            cleanAllFields();
+        }
+
+        function finishTicket() {
+            if(currentTicket.length === 0) return alert("Adicione jogos!");
+            allTickets.push({ id: Date.now(), games: currentTicket, data: new Date().toLocaleString() });
+            localStorage.setItem('tickets_ari_v16', JSON.stringify(allTickets));
+            currentTicket = []; alert("Bilhete Salvo!");
+        }
+
+        function toggleHistory(s) {
+            document.getElementById('history-screen').style.display = s ? 'block' : 'none';
+            if(s) renderHistory();
+        }
+
+        function deleteTicket(id) {
+            if(confirm("Excluir bilhete?")) {
+                allTickets = allTickets.filter(t => t.id !== id);
+                localStorage.setItem('tickets_ari_v16', JSON.stringify(allTickets));
+                renderHistory();
+            }
+        }
+
+        function markGame(ticketId, gameIndex, status) {
+            const ticket = allTickets.find(t => t.id === ticketId);
+            if(ticket) {
+                ticket.games[gameIndex].status = status;
+                localStorage.setItem('tickets_ari_v16', JSON.stringify(allTickets));
+                renderHistory();
+            }
+        }
+
+        function renderHistory() {
+            const l = document.getElementById('history-list'); l.innerHTML = "";
+            allTickets.slice().reverse().forEach(t => {
+                const allWin = t.games.every(g => g.status === 'win');
+                const anyLoss = t.games.some(g => g.status === 'loss');
+                let stClass = anyLoss ? 'background:var(--red)' : (allWin ? 'background:var(--green);color:black' : 'background:#444');
+                let stText = anyLoss ? 'BILHETE RED ❌' : (allWin ? 'BILHETE GREEN ✅' : 'AGUARDANDO...');
+
+                let d = document.createElement('div'); d.className = 'history-card';
+                d.innerHTML = `
+                    <button class="btn-del-ticket" onclick="deleteTicket(${t.id})">EXCLUIR</button>
+                    <div style="padding:2px 8px; border-radius:4px; font-weight:bold; font-size:0.7rem; display:inline-block; ${stClass}">${stText}</div>
+                    <div style="font-size:0.6rem; color:#888; margin-top:5px">${t.data}</div>`;
+
+                t.games.forEach((g, i) => {
+                    let color = g.status === 'win' ? 'var(--green)' : (g.status === 'loss' ? 'var(--red)' : 'white');
+                    d.innerHTML += `<div style="display:flex; justify-content:space-between; align-items:center; border-top:1px solid #222; margin-top:8px; padding-top:5px">
+                        <div style="font-size:0.75rem; color:${color}"><b>${g.times}</b><br>${g.k}</div>
+                        <div style="display:flex; gap:4px">
+                            <button onclick="markGame(${t.id},${i},'win')" style="width:24px; height:24px; border-radius:50%; background:var(--green); border:none; font-size:0.6rem; font-weight:bold">V</button>
+                            <button onclick="markGame(${t.id},${i},'loss')" style="width:24px; height:24px; border-radius:50%; background:var(--red); border:none; color:white; font-size:0.6rem; font-weight:bold">X</button>
+                        </div>
+                    </div>`;
+                });
+                l.appendChild(d);
+            });
+        }
+        updateUI();
+    </script>
+</body>
+</html>
